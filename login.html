@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Document</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+</head>
+<body>
+    
+</body>
+</html>
+<body>
+    <div class="container">
+        <h1>Login</h1>
+        <form id="login-form">
+          <input type="email" id="email" placeholder="Email" required />
+          <input type="password" id="password" placeholder="Senha" required />
+          <button type="submit">Entrar</button>
+        </form>
+    
+        <div class="toggle-link" onclick="mostrarCadastro()">Não tem conta? Criar conta</div>
+    
+        <form id="signup-form">
+          <h2>Cadastro</h2>
+          <input type="email" id="signup-email" placeholder="Email" required />
+          <input type="password" id="signup-password" placeholder="Senha" required />
+          <button type="submit">Criar Conta</button>
+        </form>
+      </div>
+    
+      
+      
+      <script>
+        function mostrarCadastro() {
+          document.getElementById("signup-form").style.display = "flex";
+          document.getElementById("login-form").style.display = "none"
+        }
+      </script>
+
+  <script src="login_cadastro.js"></script>
+</body>
+</html>

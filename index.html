@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="cadastro.css">
+    <title>Document</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Cadastro de Jogos</h1>
+
+        <form id="formulario">
+          <input type="text" id="jogo" placeholder="Nome do jogo" required />
+          <input type="text" id="tempo" placeholder="Tempo para zerar" required />
+          <input type="number" id="nota" placeholder="Nota" required />
+          <button type="submit">Salvar Jogo</button>
+        </form>
+      
+        <button id="logout">Sair</button>
+      
+        <h2>Seus Jogos:</h2>
+        <ul id="lista-jogos"></ul>
+    </div>
+</body>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<script src="incert.js"></script>
+</html>
