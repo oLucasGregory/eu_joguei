@@ -2,8 +2,10 @@
     const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBndGFzc3dqY25neXhudnBxb2htIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3NDEzMTQsImV4cCI6MjA2MDMxNzMxNH0.UFBWw-T1dFiRBIe8VYZilFdyxv-7uXS7suVPxMHa1aQ";
     const API_KEY = 'd61db569296c4247ad1c85f44ec188c7';  
     const API_URL = 'https://api.rawg.io/api/games';
-    
+
+    let jogosDoUsuario = [];
     let jogoSelecionado = null;
+
     const client = supabase.createClient(supabaseUrl, supabaseKey, {
         auth: {
           persistSession: true,
@@ -29,54 +31,173 @@
     }
 
     // Buscar os jogos do usuário
-    async function buscarJogosDoUsuario(userId) {
+    
+
+async function buscarJogosDoUsuario(userId) {
+  const { data, error } = await client
+    .from("games")
+    .select("*")
+    .eq("user_id", userId)
+    .limit(20);
+
+  if (error) {
+    console.error("Erro ao buscar jogos:", error);
+    return;
+  }
+
+  jogosDoUsuario = data; // salva os dados
+  exibirJogos(jogosDoUsuario); // mostra todos os jogos inicialmente
+}
+
+// Função fora da função async
+async function exibirJogos(listaJogos) {
+  const lista = document.getElementById("lista-jogos");
+  lista.innerHTML = "";
+
+  const contador = document.getElementById("contador-jogos");
+  contador.textContent = `🎮 Você tem ${listaJogos.length} jogo${listaJogos.length === 1 ? '' : 's'} cadastrado${listaJogos.length === 1 ? '' : 's'}`;
+
+  // Itera pelos jogos do usuário
+  for (const jogo of listaJogos) {
+    const item = document.createElement("li");
+    item.classList.add("game-item");
+
+    const imagem = document.createElement("img");
+    imagem.src = jogo.image;
+    imagem.alt = jogo.name;
+    imagem.classList.add("game-image");
+
+    const detalhes = document.createElement("div");
+    detalhes.classList.add("game-details");
+
+    const nome = document.createElement("h3");
+    nome.textContent = jogo.name;
+
+    const tempo = document.createElement("p");
+    tempo.textContent = `Tempo para zerar: ${jogo.time_to_finish} horas`;
+
+    // Nota do usuário
+    const nota = document.createElement("p");
+    nota.textContent = `Sua nota: ${Math.round(jogo.score)}`; // Arredonda para inteiro
+
+    // Criar elemento separado para a média de notas
+    const notaMedia = document.createElement("p");
+    notaMedia.textContent = "Calculando média...";
+
+    // Buscar média de todos os usuários para esse jogo (mesmo nome)
+    try {
       const { data, error } = await client
         .from("games")
-        .select("*")
-        .eq("user_id", userId);
-    
-      const lista = document.getElementById("lista-jogos");
-      lista.innerHTML = "";
-    
+        .select("score")
+        .eq("name", jogo.name);
+
+      if (error || !data || data.length === 0) {
+        notaMedia.textContent = "Média indisponível";
+      } else {
+        const soma = data.reduce((acc, j) => acc + j.score, 0);
+        const media = Math.round(soma / data.length); // Arredonda para inteiro
+        notaMedia.textContent = `Nota média: ${media}`;
+      }
+    } catch (err) {
+      notaMedia.textContent = "Erro ao calcular média";
+    }
+
+    // Botão de editar
+    const botaoEditar = document.createElement("button");
+    botaoEditar.textContent = "Editar";
+    botaoEditar.classList.add("edit-button");
+
+    botaoEditar.addEventListener("click", () => {
+      const inputTempo = document.createElement("input");
+      inputTempo.type = "number";
+      inputTempo.value = jogo.time_to_finish;
+
+      const inputNota = document.createElement("input");
+      inputNota.type = "number";
+      inputNota.value = jogo.score;
+
+      const botaoSalvar = document.createElement("button");
+      botaoSalvar.textContent = "Salvar";
+
+      botaoSalvar.addEventListener("click", async () => {
+        const novoTempo = parseFloat(inputTempo.value);
+        const novaNota = parseFloat(inputNota.value);
+
+        const { error } = await client
+          .from("games")
+          .update({
+            time_to_finish: novoTempo,
+            score: novaNota
+          })
+          .eq("id", jogo.id);
+
+        if (error) {
+          console.error("Erro ao atualizar jogo:", error);
+          alert("Erro ao atualizar. Tente novamente.");
+        } else {
+          jogo.time_to_finish = novoTempo;
+          jogo.score = novaNota;
+          exibirJogos(jogosDoUsuario); // Reexibe com dados atualizados
+        }
+      });
+
+      detalhes.innerHTML = "";
+      detalhes.appendChild(nome);
+      detalhes.appendChild(inputTempo);
+      detalhes.appendChild(inputNota);
+      detalhes.appendChild(botaoSalvar);
+    });
+
+    // Botão de excluir
+    const botaoExcluir = document.createElement("button");
+    botaoExcluir.textContent = "Excluir";
+    botaoExcluir.classList.add("delete-button");
+
+    botaoExcluir.addEventListener("click", async () => {
+      const confirmacao = confirm(`Tem certeza que deseja excluir "${jogo.name}"?`);
+      if (!confirmacao) return;
+
+      const { error } = await client
+        .from("games")
+        .delete()
+        .eq("id", jogo.id);
+
       if (error) {
-        console.error("Erro ao buscar jogos:", error);
+        alert("Erro ao excluir. Tente novamente.");
         return;
       }
-    
-      data.forEach(jogo => {
-        const item = document.createElement("li");
-        item.classList.add("game-item"); // Adicionando uma classe para estilizar
-    
-        // Criação do elemento da imagem (capa)
-        const imagem = document.createElement("img");
-        imagem.src = jogo.image; // Usando a URL da capa
-        imagem.alt = jogo.name;
-        imagem.classList.add("game-image"); // Adicionando a classe para estilizar a imagem
-    
-        // Criando os detalhes do jogo
-        const detalhes = document.createElement("div");
-        detalhes.classList.add("game-details"); // Para organizar os detalhes do jogo
-    
-        const nome = document.createElement("h3");
-        nome.textContent = jogo.name;
-    
-        const tempo = document.createElement("p");
-        tempo.textContent = `Tempo para zerar: ${jogo.time_to_finish} horas`;
-    
-        const nota = document.createElement("p");
-        nota.textContent = `Nota: ${jogo.score}`;
-    
-        // Adicionando tudo ao item do jogo
-        detalhes.appendChild(nome);
-        detalhes.appendChild(tempo);
-        detalhes.appendChild(nota);
-        item.appendChild(imagem);
-        item.appendChild(detalhes);
-    
-        // Adicionando o item completo à lista
-        lista.appendChild(item);
-      });
-    }
+
+      // Atualiza a lista localmente
+      jogosDoUsuario = jogosDoUsuario.filter(j => j.id !== jogo.id);
+      exibirJogos(jogosDoUsuario);
+    });
+
+    // Adiciona tudo ao item de lista
+    detalhes.appendChild(nome);
+    detalhes.appendChild(tempo);
+    detalhes.appendChild(nota);
+    detalhes.appendChild(notaMedia); // Média de notas
+    detalhes.appendChild(botaoEditar);
+    detalhes.appendChild(botaoExcluir);
+
+    item.appendChild(imagem);
+    item.appendChild(detalhes);
+    lista.appendChild(item);
+  }
+}
+
+
+
+
+// Filtro da busca — só adiciona uma vez
+document.getElementById("busca-jogo").addEventListener("input", function () {
+  const termo = this.value.toLowerCase();
+  const jogosFiltrados = jogosDoUsuario.filter(jogo =>
+    jogo.name.toLowerCase().includes(termo)
+  );
+  exibirJogos(jogosFiltrados);
+});
+
     
 
     // Cadastrar jogo
