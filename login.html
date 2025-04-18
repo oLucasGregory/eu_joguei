@@ -13,29 +13,36 @@
 </html>
 <body>
     <div class="container">
-        <h1>Login</h1>
+        
         <form id="login-form">
+          <h1>Login</h1>
           <input type="email" id="email" placeholder="Email" required />
           <input type="password" id="password" placeholder="Senha" required />
           <button type="submit">Entrar</button>
+          <div class="toggle-link" onclick="mostrarCadastro()">Não tem conta? Criar conta</div>
         </form>
     
-        <div class="toggle-link" onclick="mostrarCadastro()">Não tem conta? Criar conta</div>
+        
     
-        <form id="signup-form">
+        <form style="display: none;" id="signup-form">
           <h2>Cadastro</h2>
           <input type="email" id="signup-email" placeholder="Email" required />
           <input type="password" id="signup-password" placeholder="Senha" required />
           <button type="submit">Criar Conta</button>
+          <div class="toggle-link" onclick="mostrarLogin()">Já tenho conta</div>
         </form>
+        <div id="signup-message" style="margin-top: 10px; font-weight: bold;"></div>
       </div>
-    
       
       
       <script>
         function mostrarCadastro() {
           document.getElementById("signup-form").style.display = "flex";
           document.getElementById("login-form").style.display = "none"
+        }
+        function mostrarLogin(){
+          document.getElementById("login-form").style.display = "flex"
+          document.getElementById("signup-form").style.display = "none";
         }
       </script>
 

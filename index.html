@@ -11,16 +11,20 @@
         <h1>Cadastro de Jogos</h1>
 
         <form id="formulario">
-          <input type="text" id="jogo" placeholder="Nome do jogo" required />
-          <input type="text" id="tempo" placeholder="Tempo para zerar" required />
-          <input type="number" id="nota" placeholder="Nota" required />
-          <button type="submit">Salvar Jogo</button>
+            <input type="text" id="jogo" placeholder="Nome do jogo" required autocomplete="off" />
+            <div id="suggestions" class="suggestions"></div> <!-- Lista de sugestões -->
+            <input type="text" id="tempo" placeholder="Tempo para zerar" required />
+            <input type="number" id="nota" placeholder="Nota" required min="0" max="10" />
+            <button type="submit">Salvar Jogo</button>
         </form>
       
         <button id="logout">Sair</button>
       
+        
+    </div>
+    <div class="meus-jogos-container">
         <h2>Seus Jogos:</h2>
-        <ul id="lista-jogos"></ul>
+    <ul id="lista-jogos"></ul>
     </div>
 </body>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
